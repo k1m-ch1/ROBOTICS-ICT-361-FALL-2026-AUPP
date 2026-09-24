@@ -9,6 +9,8 @@ extern SemaphoreHandle_t currentDabbleRCModeMutex;
 
 extern TaskHandle_t dabbleOrchestratorTaskHandle;
 
+const char *getDabbleRCModeName(DabbleRCMode dabbleRCMode);
+
 void dabbleOrchestratorInit();
 
 void dabbleOrchestratorTask(void *args);

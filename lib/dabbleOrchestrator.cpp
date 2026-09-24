@@ -16,6 +16,19 @@ SemaphoreHandle_t currentDabbleRCModeMutex;
 
 TaskHandle_t dabbleOrchestratorTaskHandle;
 
+const char *getDabbleRCModeName(DabbleRCMode dabbleRCMode) {
+  switch (dabbleRCMode) {
+  case IDLE:
+    return "IDLE";
+  case MANUAL:
+    return "MANUAL";
+  case AUTO:
+    return "AUTO";
+  default:
+    return "UNKNOWN";
+  }
+}
+
 void dabbleOrchestratorInit() {
   // first we need to initialize the modes and create the mutex
   currentDabbleRCModeMutex = xSemaphoreCreateMutex();
@@ -36,14 +49,29 @@ void dabbleOrchestratorTask(void *args) {
     xSemaphoreTake(dabbleRCButtonStateMutex,
                    portMAX_DELAY); // wait indefinitely
     // consume only
-    if (detectEdge(prevDabbleRCButtonState.start, dabbleRCButtonState.start,
-                   EDGE_RISING)) {
-      sprintf(dabbleOrchestratorLogMessage.text, "START button pressed");
-      xQueueSend(logQueueHandle, &dabbleOrchestratorLogMessage, 0);
-    }
     if (detectEdge(prevDabbleRCButtonState.select, dabbleRCButtonState.select,
                    EDGE_RISING)) {
-      sprintf(dabbleOrchestratorLogMessage.text, "SELECT button pressed");
+      xSemaphoreTake(currentDabbleRCModeMutex,
+                     portMAX_DELAY); // wait indefinitely
+      currentDabbleRCMode = MANUAL;
+      xSemaphoreGive(currentDabbleRCModeMutex);
+
+      sprintf(dabbleOrchestratorLogMessage.text,
+              "SELECT button pressed. currentDabbleRCMode set to %s",
+              getDabbleRCModeName(currentDabbleRCMode));
+
+      xQueueSend(logQueueHandle, &dabbleOrchestratorLogMessage, 0);
+    }
+
+    if (detectEdge(prevDabbleRCButtonState.start, dabbleRCButtonState.start,
+                   EDGE_RISING)) {
+      xSemaphoreTake(currentDabbleRCModeMutex,
+                     portMAX_DELAY); // wait indefinitely
+      currentDabbleRCMode = AUTO;
+      sprintf(dabbleOrchestratorLogMessage.text,
+              "START button pressed. currentDabbleRCMode set to %s",
+              getDabbleRCModeName(currentDabbleRCMode));
+      xSemaphoreGive(currentDabbleRCModeMutex);
       xQueueSend(logQueueHandle, &dabbleOrchestratorLogMessage, 0);
     }
     xSemaphoreGive(dabbleRCButtonStateMutex);
