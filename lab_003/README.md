@@ -1,5 +1,8 @@
 # TODO
 
+- [] check servo library working
+- [] make good use of the servo angle atomic variable
+- [] check ultrasonic library working
 - [] double check the pin definitions
 - [] write the Dabble polling task (because Dabble exposes a polling API)
 - [] write the servo control task (notification model)
