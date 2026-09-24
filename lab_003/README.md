@@ -1,3 +1,102 @@
+# TODO
+
+- [] double check the pin definitions
+- [] write the Dabble polling task (because Dabble exposes a polling API)
+- [] write the servo control task (notification model)
+- [] write the ultrasonic sensor task (queue based model, which notifies the automatic mode)
+- [] write the dabble RC task
+- [] check for side effects to lab 1 because we're going to define a new `detectEdge` function in the utils
+
+# Start up dependencies
+
+So, right now, we have some weird dependencies going on.
+
+- `dabbleRCTask` requires `dabbleOrchestrator` because it needs to notify it
+- `dabbleOrchestrator` receives notification from `dabbleRC` and then starts doing its thing (so this should be started first)
+
+- `dabbleAutoMode` waits for the `dabbleOrchestrator` to initialize the modes mutex, so it should be started higher up.
+- `dabbleManualMode` waits for `dabbleOrchestrator` to notify it, but it needs to be initialized immediately so that `dabbleOrchestrator` can call it
+
+So essentially, we start up in this order:
+
+1. `dabbleManualMode`: because it just starts up and halts until someone notifies it, meaning that it will create a task handle, and then wait until `dabbleOrchestrator` notifies it which would have guaranteed that `dabbleOrchestrator` initialized its modes variables and stuff
+2. `dabbleOrchestrator`: we need this now because we need to initialize the modes that the auto-mode needs
+4. `dabbleRCTask`: can now call `dabbleOrchestrator` by its handle
+3. `dabbleAutoMode`: `dabbleOrchestrator` has already initialized the modes mutex so it is fine
+
+## Can be started immediately without worries
+
+- `ultrasonic` pushes to a queue because, we actually want to use the ultrasonic sensor outside of the scope of this project, but this is naive and can be started immediately
+- `servo` is a consumer, can be started immediately
+
+# Pre-requisites
+
+We are going to use the Dabble mobile app, along side with their decoder, which can be installed as such:
+
+```
+arduino-cli lib install "DabbleESP32"
+```
+
+# Reference code snippets
+
+```c
+#define CUSTOM_SETTINGS
+#define INCLUDE_GAMEPAD_MODULE
+
+#include <DabbleESP32.h>
+
+const char* BT_NAME = "Name";
+
+void setup() {
+  Serial.begin(115200);
+  Dabble.begin(BT_NAME);
+  Serial.println("Dabble Gamepad connected");
+}
+
+void loop() {
+  Dabble.processInput();
+
+  // Direction buttons
+  if (GamePad.isUpPressed()) {
+    Serial.println("UP pressed");
+  }
+  if (GamePad.isDownPressed()) {
+    Serial.println("DOWN pressed");
+  }
+  if (GamePad.isLeftPressed()) {
+    Serial.println("LEFT pressed");
+  }
+  if (GamePad.isRightPressed()) {
+    Serial.println("RIGHT pressed");
+  }
+
+  // Action buttons
+  if (GamePad.isSquarePressed()) {
+    Serial.println("SQUARE pressed");
+  }
+  if (GamePad.isTrianglePressed()) {
+    Serial.println("TRIANGLE pressed");
+  }
+  if (GamePad.isCirclePressed()) {
+    Serial.println("CIRCLE pressed");
+  }
+  if (GamePad.isCrossPressed()) {
+    Serial.println("CROSS pressed");
+  }
+
+  // Control buttons
+  if (GamePad.isStartPressed()) {
+    Serial.println("START pressed");
+  }
+  if (GamePad.isSelectPressed()) {
+    Serial.println("SELECT pressed");
+  }
+
+  delay(50);
+}
+```
+
+
 # Task architecture
 
 So we need the following tasks:
@@ -49,7 +148,8 @@ So it would be nice if we refactor the code as follows:
 
 - for every shared struct, we should also store the mutex that gets initialized inside of it (that is, assuming that the mutex is initialized only once)
 
+## Summary
 
-# TODO
+So this is the plan:
 
-
+- We have a dabble RC task whose job is purely to poll for the button state and then just either the data into a queue, or just updates an external state. I think I'll use a simple state variable for simplicity, and just have a struct wrapping it.

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils.h"
+
 float asymNormalizedMap(float raw, float minLeft, float maxLeft, float minRight,
                         float maxRight) {
   // assume that minLeft < maxLeft < minRight < maxRight even without checking
@@ -16,4 +18,14 @@ float asymNormalizedMap(float raw, float minLeft, float maxLeft, float minRight,
 float mapFloat(float x, float x0, float x1, float y0, float y1) {
   double y = ((y1 - y0) / (x1 - x0)) * (x - x0) + y0;
   return y;
+}
+bool detectEdge(bool prevState, bool currentState, EdgeType edgeType) {
+  switch (edgeType) {
+  case EDGE_FALLING:
+    return prevState && (!currentState);
+  case EDGE_RISING:
+    return (!currentState) && prevState;
+  case EDGE_CHANGE:
+    return (prevState && (!currentState)) && ((!currentState) && prevState);
+  }
 }

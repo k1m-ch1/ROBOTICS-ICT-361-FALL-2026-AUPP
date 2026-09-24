@@ -32,6 +32,18 @@ const char *getLogSourceName(LogSource logSource) {
     return "NEC";
   case NEC_RC:
     return "NEC_RC";
+  case DABBLE_RC:
+    return "DABBLE_RC";
+  case ULTRASONIC:
+    return "ULTRASONIC";
+  case SERVO:
+    return "SERVO";
+  case DABBLE_ORCHESTRATOR:
+    return "DABBLE_ORCHESTRATOR";
+  case DABBLE_MANUAL_MODE:
+    return "DABBLE_MANUAL_MODE";
+  case DABBLE_AUTO_MODE:
+    return "DABBLE_AUTO_MODE";
   default:
     return "UNKNOWN";
   }

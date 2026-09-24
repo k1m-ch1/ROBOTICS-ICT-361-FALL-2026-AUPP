@@ -52,5 +52,14 @@ typedef struct {
 
 #define IR_RECEIVER_PIN 36
 
+#define SERVO_PIN 17
+
+typedef struct {
+  uint8_t trig;
+  uint8_t echo;
+} UltrasonicPins;
+
+constexpr UltrasonicPins ultrasonicPins = {.trig = 13, .echo = 39};
+
 const MotorConfig motorConfig = {
     .freq = 20000, .resolution = 8, .deadzone = 0.08f};

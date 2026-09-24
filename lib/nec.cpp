@@ -37,6 +37,7 @@ void necEdgeISR() {
     edgeInfo.type = FALLING;
   }
   edgeInfo.timestamp = micros();
+  // NOTE: if the queue is full, we basically just lost that edge
   xQueueSendFromISR(edgeInfoQueueHandle, &edgeInfo, &higherPriorityTaskWoken);
 
   if (higherPriorityTaskWoken) {
