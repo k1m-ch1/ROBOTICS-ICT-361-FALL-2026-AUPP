@@ -7,6 +7,7 @@
 - [x] write the Dabble polling task (because Dabble exposes a polling API)
 ~~- [x] write the servo control task (notification model)~~ (simple pure function with side effects now, the manual mode is the one who keep tracks of the current angle)
 - [x] write the ultrasonic sensor task (queue based model, which notifies the automatic mode)
+- [] think about how to wrap up stop the motors when switching from manual -> auto, etc.
 - [] write the dabble RC task
 - [] check for side effects to lab 1 because we're going to define a new `detectEdge` function in the utils
 

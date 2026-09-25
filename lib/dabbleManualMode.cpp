@@ -17,10 +17,10 @@ void dabbleManualModeInit() {
   // i'm going to use a .store as opposed to regular functions with syntactic
   // sugar to distinguish it with regular non-atomic primitives
 
-  currentAngle.store(servoConfig.minAngle);
+  currentAngle.store(servoConfig.maxAngle);
   servoWrite(currentAngle.load());
-  xTaskCreate(dabbleManualModeTask, "Dabble Manual Mode Task", 4096, nullptr, 1,
-              &dabbleManualModeTaskHandle);
+  xTaskCreatePinnedToCore(dabbleManualModeTask, "Dabble Manual Mode Task", 4096,
+                          nullptr, 1, &dabbleManualModeTaskHandle, 1);
 }
 
 void dabbleManualModeTask(void *args) {
@@ -79,9 +79,11 @@ void dabbleManualModeTask(void *args) {
     if (dabbleRCButtonState.down) {
       speed.linear = -1.0f;
     }
+    /*
     sprintf(dabbleManualModeLogMessage.text, "linear: %f, angular: %f",
             speed.linear, speed.angular);
     xQueueSend(logQueueHandle, &dabbleManualModeLogMessage, 0);
+    */
 
     // we do this because, if we were to press left and up at the same time for
     // instance, we still want it to do some stuff unlock the mutex we want to
@@ -93,45 +95,46 @@ void dabbleManualModeTask(void *args) {
 
     // now we're checking whether we want the servo to move and stuff
 
+    bool anyEdgeDetected = false;
     if (detectEdge(prevDabbleRCButtonState.square, dabbleRCButtonState.square,
                    EDGE_RISING)) {
       // if it's square, increase angle by 10
-
       currentAngle += SERVO_ANGLE_STEP_SIZE;
-      sprintf(dabbleManualModeLogMessage.text, "SQUARE button registered");
-      xQueueSend(logQueueHandle, &dabbleManualModeLogMessage, 0);
+      anyEdgeDetected = true;
     }
 
     if (detectEdge(prevDabbleRCButtonState.circle, dabbleRCButtonState.circle,
                    EDGE_RISING)) {
       // if it's circle, decrease angle by 10
       currentAngle -= SERVO_ANGLE_STEP_SIZE;
-      sprintf(dabbleManualModeLogMessage.text, "CIRCLE button registered");
-      xQueueSend(logQueueHandle, &dabbleManualModeLogMessage, 0);
+      anyEdgeDetected = true;
     }
 
     if (detectEdge(prevDabbleRCButtonState.triangle,
                    dabbleRCButtonState.triangle, EDGE_RISING)) {
       // if it's a triangle, move to servoConfig.maxAngle = 140.0f
       currentAngle.store(servoConfig.maxAngle);
-      sprintf(dabbleManualModeLogMessage.text, "TRIANGLE button registered");
-      xQueueSend(logQueueHandle, &dabbleManualModeLogMessage, 0);
+      anyEdgeDetected = true;
     }
 
     if (detectEdge(prevDabbleRCButtonState.cross, dabbleRCButtonState.cross,
                    EDGE_RISING)) {
       // if it's cross, move to servoConfig.minAngle = 30.0f
       currentAngle.store(servoConfig.minAngle);
-      sprintf(dabbleManualModeLogMessage.text, "CROSS button registered");
-      xQueueSend(logQueueHandle, &dabbleManualModeLogMessage, 0);
+      anyEdgeDetected = true;
     }
 
     xSemaphoreGive(dabbleRCButtonStateMutex);
 
     // at the end of it, we load it (this isn't atomic, but there aren't weird
     // cases where one overwrite the other) we clamp it
-    currentAngle.store(max(servoConfig.minAngle,
-                           min(servoConfig.maxAngle, currentAngle.load())));
-    // servoWrite(currentAngle.load());
+    if (anyEdgeDetected) {
+      currentAngle.store(max(servoConfig.minAngle,
+                             min(servoConfig.maxAngle, currentAngle.load())));
+      sprintf(dabbleManualModeLogMessage.text, "servo angle: %f",
+              currentAngle.load());
+      xQueueSend(logQueueHandle, &dabbleManualModeLogMessage, 0);
+      servoWrite(currentAngle.load());
+    }
   }
 }

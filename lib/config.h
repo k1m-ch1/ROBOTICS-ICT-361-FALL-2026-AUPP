@@ -29,8 +29,8 @@ typedef struct {
 
 const JoystickConfig joystickConfig = {.adcMin = 0,
                                        .adcMax = 4096,
-                                       .adcDeadzoneMin = 1820,
-                                       .adcDeadzoneMax = 1865,
+                                       .adcDeadzoneMin = 1800,
+                                       .adcDeadzoneMax = 1900,
                                        .debounceDelayMs = 20};
 
 typedef struct {
@@ -62,4 +62,4 @@ typedef struct {
 constexpr UltrasonicPins ultrasonicPins = {.trig = 13, .echo = 39};
 
 const MotorConfig motorConfig = {
-    .freq = 20000, .resolution = 8, .deadzone = 0.08f};
+    .freq = 20000, .resolution = 8, .deadzone = 0.04f};
