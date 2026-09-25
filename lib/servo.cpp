@@ -33,9 +33,11 @@ void servoWrite(float angle) {
   float duty = (1 - t) * minDutyCycle + t * maxDutyCycle;
   uint32_t dutyToWrite = (uint32_t)(duty * (1 << servoConfig.resolution));
   ledcWrite(SERVO_PIN, dutyToWrite);
+  /*
   sprintf(servoLogMessage.text, "angle: %f, duty: %f, dutyToWrite: %lu", angle,
           duty, dutyToWrite);
   xQueueSend(logQueueHandle, &servoLogMessage, 0);
+  */
   /*
   sprintf(servoLogMessage.text, "minDutyCycle: %f, maxDutyCycle: %f",
           minDutyCycle, maxDutyCycle);

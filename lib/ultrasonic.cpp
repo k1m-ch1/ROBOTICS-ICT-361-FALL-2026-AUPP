@@ -43,7 +43,18 @@ void ultrasonicTask(void *args) {
     delayMicroseconds(10);
     digitalWrite(ultrasonicPins.trig, LOW);
     // read a HIGH pulse
-    pulsePeriodMicroseconds = pulseIn(ultrasonicPins.echo, HIGH);
+    while (!digitalRead(ultrasonicPins.echo)) {
+      // do nothing until it goes HIGH
+    }
+    pulsePeriodMicroseconds = micros();
+    while (digitalRead(ultrasonicPins.echo)) {
+      // we need to detect timeout
+      if (micros() - pulsePeriodMicroseconds > ULTRASONIC_TIMEOUT_US) {
+        break;
+      }
+      // now we're reading the pulse
+    }
+    pulsePeriodMicroseconds = micros() - pulsePeriodMicroseconds;
 
     // record the time we got the LOW pulse
     ultrasonicData.timestamp = millis();

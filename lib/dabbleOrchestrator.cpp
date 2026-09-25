@@ -6,6 +6,7 @@ extern SemaphoreHandle_t currentDabbleRCModeMutex;
 */
 
 #include "dabbleOrchestrator.h"
+#include "dabbleManualMode.h"
 #include "dabbleRC.h"
 #include "logging.h"
 #include "utils.h"
@@ -46,15 +47,17 @@ void dabbleOrchestratorTask(void *args) {
     dabbleOrchestratorLogMessage.timestamp = millis();
     xTaskNotifyWait(0, 0, nullptr, portMAX_DELAY);
 
+    // TODO: make sure to enforce a global order for this
+    xSemaphoreTake(currentDabbleRCModeMutex,
+                   portMAX_DELAY); // wait indefinitely
+
     xSemaphoreTake(dabbleRCButtonStateMutex,
                    portMAX_DELAY); // wait indefinitely
+
     // consume only
     if (detectEdge(prevDabbleRCButtonState.select, dabbleRCButtonState.select,
                    EDGE_RISING)) {
-      xSemaphoreTake(currentDabbleRCModeMutex,
-                     portMAX_DELAY); // wait indefinitely
       currentDabbleRCMode = MANUAL;
-      xSemaphoreGive(currentDabbleRCModeMutex);
 
       sprintf(dabbleOrchestratorLogMessage.text,
               "SELECT button pressed. currentDabbleRCMode set to %s",
@@ -65,15 +68,18 @@ void dabbleOrchestratorTask(void *args) {
 
     if (detectEdge(prevDabbleRCButtonState.start, dabbleRCButtonState.start,
                    EDGE_RISING)) {
-      xSemaphoreTake(currentDabbleRCModeMutex,
-                     portMAX_DELAY); // wait indefinitely
+
       currentDabbleRCMode = AUTO;
       sprintf(dabbleOrchestratorLogMessage.text,
               "START button pressed. currentDabbleRCMode set to %s",
               getDabbleRCModeName(currentDabbleRCMode));
-      xSemaphoreGive(currentDabbleRCModeMutex);
       xQueueSend(logQueueHandle, &dabbleOrchestratorLogMessage, 0);
     }
     xSemaphoreGive(dabbleRCButtonStateMutex);
+    xSemaphoreGive(currentDabbleRCModeMutex);
+
+    // we notify the Manual Task, if we see that the mode is MANUAL. Hopefully,
+    // the Manual Task will wait until we give back the mutex
+    xTaskNotifyGive(dabbleManualModeTaskHandle);
   }
 }

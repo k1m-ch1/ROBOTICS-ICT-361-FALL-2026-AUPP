@@ -3,7 +3,7 @@
 #include "dabbleOrchestrator.h"
 
 // polling period in Hz (because Dabble uses a polling based API)
-#define DABBLE_RC_POLLING_RATE 100.0f
+#define DABBLE_RC_POLLING_RATE 60.0f
 
 #define BT_NAME "k1mch1 ESP32 robot"
 
