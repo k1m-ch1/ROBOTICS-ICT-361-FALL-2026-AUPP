@@ -65,9 +65,11 @@ void ultrasonicTask(void *args) {
     xQueueSend(ultrasonicQueueHandle, &ultrasonicData, 0);
 
     ultrasonicLogMessage.timestamp = millis();
+    /*
     sprintf(ultrasonicLogMessage.text, "Got a pulse of %lu microseconds",
             pulsePeriodMicroseconds);
     xQueueSend(logQueueHandle, &ultrasonicLogMessage, 0);
+    */
     // assume that we've already initialized the pins
     vTaskDelayUntil(&lastWakeTime, period);
   }
