@@ -1,0 +1,8 @@
+flowchart TD
+    Start([Start]) --> Init["initialize pins and queue"]
+    Init --> WhileTrue{While True}
+    WhileTrue -- False --> End([End])
+    WhileTrue -- True --> ReadSensor["get the pulsePeriod"]
+    ReadSensor --> PushToQueue["push to the ultrasonic queue"]
+    PushToQueue --> Delay["delay such that it's polling at a fixed frequency"]
+    Delay --> WhileTrue

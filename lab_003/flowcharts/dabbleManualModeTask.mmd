@@ -1,0 +1,13 @@
+flowchart TD
+    Start([Start]) --> Init["Initialize the servo variable (atomic), write it to the servo"]
+    Init --> WhileTrue{While True}
+    WhileTrue -- False --> End([End])
+    WhileTrue -- True --> WaitForNotification["wait for notification forever (blocking)"]
+    WaitForNotification --> IsManualMode{"mode == MANUAL?"}
+    IsManualMode -- False --> WhileTrue
+    IsManualMode -- True --> ReadMotorButton["read the up, down, left, and right and decide whether to move forward, backward, left, right, or stop and notify the mixer task"]
+    ReadMotorButton --> ReadServoButton["read the shape buttons and decide whether to set the angle variable to something, or increment, or decrement the angle variable"]
+  ReadServoButton --> AngleClamp["clamp the servo angle such that it's in between 30 and 140 deg"]
+  AngleClamp --> ServoWrite["write to the servo"]
+  ServoWrite --> WhileTrue
+

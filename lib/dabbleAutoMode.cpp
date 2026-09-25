@@ -8,7 +8,6 @@
 #include "mixer.h"
 #include "ultrasonic.h"
 #include <Arduino.h>
-#include <iterator>
 
 DabbleAutoModeState currentDabbleAutoModeState;
 

@@ -1,0 +1,8 @@
+flowchart TD
+    Start([Start]) --> Init[Initilize all of the necessary mutex and set initial mode to IDLE]
+    Init --> WhileTrue{While True}
+    WhileTrue -- False --> End([End])
+    WhileTrue -- True --> WaitForNotification[blocking wait for notification]
+    WaitForNotification --> CheckForModeChangingButton["if SELECT has a RISING edge, set mode = AUTO; if START has a RISING edge, set mode = MANUAL"]
+    CheckForModeChangingButton --> NotifyManualMode[notify dabbleManualModeTask]
+    NotifyManualMode --> WhileTrue

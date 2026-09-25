@@ -47,7 +47,6 @@ void dabbleOrchestratorTask(void *args) {
     dabbleOrchestratorLogMessage.timestamp = millis();
     xTaskNotifyWait(0, 0, nullptr, portMAX_DELAY);
 
-    // TODO: make sure to enforce a global order for this
     xSemaphoreTake(currentDabbleRCModeMutex,
                    portMAX_DELAY); // wait indefinitely
 

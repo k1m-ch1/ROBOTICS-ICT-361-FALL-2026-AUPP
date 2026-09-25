@@ -28,7 +28,6 @@ void setup(){
   //3. `dabbleAutoMode`: `dabbleOrchestrator` has already initialized the modes mutex so it is fine
 
 
-  // TODO: initialize the mixer, take the speedLimit mutex and set it as something you can configure in here
   dabbleManualModeInit();
   dabbleOrchestratorInit();
   dabbleRCInit();

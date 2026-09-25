@@ -1,0 +1,8 @@
+flowchart TD
+    Start([Start]) --> Init[initialize Dabble and create mutex]
+    Init --> WhileTrue{While True}
+    WhileTrue -- False --> End([End])
+    WhileTrue -- True --> ReadDabbleButtons[poll for dabble button, store the previous state, and load the new state to an external variable]
+    ReadDabbleButtons --> NotifyDabbleOrchestratorTask[notify dabble orchestrator task]
+    NotifyDabbleOrchestratorTask --> Delay[delay such that it's running at a fixed frequency]
+    Delay --> WhileTrue

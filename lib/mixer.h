@@ -32,7 +32,7 @@ const int8_t SIGN_MATRIX[MOTORS_AMOUNT][OUTPUT_COMMAND_DIM] = {
 extern SemaphoreHandle_t normalizedMotorCommandsMutex;
 extern float normalizedMotorCommands[MOTORS_AMOUNT];
 
-// this variable is normalized to be in between 0 and 1
+// this variable is normalized to be in between -1 and 1
 typedef struct {
   float linear;
   float angular;
@@ -41,6 +41,7 @@ typedef struct {
 extern Speed speed;
 extern SemaphoreHandle_t speedMutex;
 
+// this variable is normalized to be in between 0 and 1
 typedef struct {
   float linear;
   float angular;

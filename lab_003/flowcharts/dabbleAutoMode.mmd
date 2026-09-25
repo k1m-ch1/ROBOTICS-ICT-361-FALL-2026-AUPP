@@ -1,0 +1,9 @@
+flowchart TD
+    Start([Start]) --> Init["set state = SEARCHING"]
+    Init --> WhileTrue{While True}
+    WhileTrue -- False --> End([End])
+    WhileTrue -- True --> TakeFromUltrasonicQueue["Take from ultrasonic queue (blocking)"]
+    TakeFromUltrasonicQueue --> IsAutoMode{mode == AUTO?}
+    IsAutoMode -- False --> WhileTrue
+    IsAutoMode -- True --> RunStateMachine["run state machine"]
+    RunStateMachine --> WhileTrue
