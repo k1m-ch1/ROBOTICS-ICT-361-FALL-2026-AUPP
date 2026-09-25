@@ -1,12 +1,12 @@
 # TODO
 
-- [] check servo library working
-- [] make good use of the servo angle atomic variable
-- [] check ultrasonic library working
-- [] double check the pin definitions
-- [] write the Dabble polling task (because Dabble exposes a polling API)
-- [] write the servo control task (notification model)
-- [] write the ultrasonic sensor task (queue based model, which notifies the automatic mode)
+- [x] check servo library working
+- [x] make good use of the servo angle atomic variable
+- [x] check ultrasonic library working
+- [x] double check the pin definitions
+- [x] write the Dabble polling task (because Dabble exposes a polling API)
+~~- [x] write the servo control task (notification model)~~ (simple pure function with side effects now, the manual mode is the one who keep tracks of the current angle)
+- [x] write the ultrasonic sensor task (queue based model, which notifies the automatic mode)
 - [] write the dabble RC task
 - [] check for side effects to lab 1 because we're going to define a new `detectEdge` function in the utils
 

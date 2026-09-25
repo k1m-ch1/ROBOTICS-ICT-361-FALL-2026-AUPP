@@ -27,9 +27,6 @@ const ServoConfig servoConfig = {.freq = 50,
                                  .minPulseMicroseconds = 500,
                                  .maxPulseMicroseconds = 2500};
 
-// TODO: update currentAngle variable everytime we perform a write
-extern std::atomic<float> currentAngle;
-
 #define ABSOLUTE_MAX_SERVO_ANGLE 180.0f
 
 float getDutyCycle(uint32_t freq, uint32_t highPulsePeriodMicroseconds);

@@ -12,7 +12,7 @@ typedef struct {
   uint32_t timestamp;
 } UltrasonicData;
 
-extern QueueHandle_t ultrasonicQueue;
+extern QueueHandle_t ultrasonicQueueHandle;
 
 float getDistanceCentimeters(uint32_t pulsePeriod);
 

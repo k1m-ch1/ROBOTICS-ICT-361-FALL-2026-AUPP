@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-QueueHandle_t ultrasonicQueue;
+QueueHandle_t ultrasonicQueueHandle;
 
 float getDistanceCentimeters(uint32_t pulsePeriod) {
   // assume that the speed of sound is 343m/s = 34300cm/s = 34300/1000_000 cm/us
@@ -23,7 +23,8 @@ void ultrasonicInit() {
   pinMode(ultrasonicPins.echo, INPUT);
   pinMode(ultrasonicPins.trig, OUTPUT);
   digitalWrite(ultrasonicPins.trig, LOW);
-  ultrasonicQueue = xQueueCreate(ULTRASONIC_QUEUE_SIZE, sizeof(UltrasonicData));
+  ultrasonicQueueHandle =
+      xQueueCreate(ULTRASONIC_QUEUE_SIZE, sizeof(UltrasonicData));
   xTaskCreate(ultrasonicTask, "Dabble Orchestrator Task", 4096, nullptr, 1,
               nullptr);
 }
@@ -51,7 +52,7 @@ void ultrasonicTask(void *args) {
     // the queue will be filled with left over data. Perhaps not the
     // best, but, we assume that the consumer gets started quite quickly and
     // starts consuming immediately
-    xQueueSend(ultrasonicQueue, &ultrasonicData, 0);
+    xQueueSend(ultrasonicQueueHandle, &ultrasonicData, 0);
 
     ultrasonicLogMessage.timestamp = millis();
     sprintf(ultrasonicLogMessage.text, "Got a pulse of %lu microseconds",

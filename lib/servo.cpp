@@ -5,10 +5,9 @@
 #include "logging.h"
 #include <Arduino.h>
 
-std::atomic<float> currentAngle;
-
 void servoInit() {
-  ledcAttach(servoConfig.freq, servoConfig.resolution, SERVO_PIN);
+  // 10 bits resolution is fine?
+  ledcAttach(SERVO_PIN, servoConfig.freq, servoConfig.resolution);
 }
 
 float getDutyCycle(uint32_t freq, uint32_t highPulsePeriodMicroseconds) {
@@ -16,16 +15,30 @@ float getDutyCycle(uint32_t freq, uint32_t highPulsePeriodMicroseconds) {
   // if we have a frequency in Hz, then every period is 1 000 000 / freq
   // microseconds
 
-  float periodMicroseconds = 10e6 / ((float)freq);
+  float periodMicroseconds = 1e6 / ((float)freq);
 
   return (highPulsePeriodMicroseconds / periodMicroseconds);
 }
 
 void servoWrite(float angle) {
+  LogMessage servoLogMessage;
+  servoLogMessage.logSource = SERVO;
+  servoLogMessage.timestamp = millis();
   float t = angle / ABSOLUTE_MAX_SERVO_ANGLE;
-  float duty =
-      (1 - t) *
-          getDutyCycle(servoConfig.freq, servoConfig.minPulseMicroseconds) +
-      t * getDutyCycle(servoConfig.freq, servoConfig.maxPulseMicroseconds);
-  ledcWrite(SERVO_PIN, duty * (1 << servoConfig.resolution));
+  float minDutyCycle =
+      getDutyCycle(servoConfig.freq, servoConfig.minPulseMicroseconds);
+  float maxDutyCycle =
+      getDutyCycle(servoConfig.freq, servoConfig.maxPulseMicroseconds);
+
+  float duty = (1 - t) * minDutyCycle + t * maxDutyCycle;
+  uint32_t dutyToWrite = (uint32_t)(duty * (1 << servoConfig.resolution));
+  ledcWrite(SERVO_PIN, dutyToWrite);
+  sprintf(servoLogMessage.text, "angle: %f, duty: %f, dutyToWrite: %lu", angle,
+          duty, dutyToWrite);
+  xQueueSend(logQueueHandle, &servoLogMessage, 0);
+  /*
+  sprintf(servoLogMessage.text, "minDutyCycle: %f, maxDutyCycle: %f",
+          minDutyCycle, maxDutyCycle);
+  xQueueSend(logQueueHandle, &servoLogMessage, 0);
+  */
 }
