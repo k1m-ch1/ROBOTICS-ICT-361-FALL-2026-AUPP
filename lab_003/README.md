@@ -69,6 +69,11 @@ The state diagram is as follows:
 
 ![dabbleAutoModeStateMachine state diagram](./assets/flowcharts/dabbleAutoModeStateMachine.mmd.svg)
 
+We also cause side effects upon transitions as such:
+
+- !obstacleInFront: externally write to mixer to move forward
+- obstacleInFront: externally write to mixer to turn left
+
 # Start up dependencies
 
 So, right now, we have some weird dependencies going on.

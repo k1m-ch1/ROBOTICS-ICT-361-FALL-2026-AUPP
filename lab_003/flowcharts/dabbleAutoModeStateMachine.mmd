@@ -1,8 +1,12 @@
+---
+config: 
+  layout: elk
+---
 stateDiagram-v2
   state "SEARCHING" as SEARCHING
   state "TRAVELLING" as TRAVELLING
  
-  SEARCHING --> TRAVELLING : !obstacleInFront (externally write to mixer to move forward)
-  SEARCHING --> SEARCHING: obstacleInFront (externally write to mixer to turn left)
-  TRAVELLING --> SEARCHING: obstacleInFront (externally write to mixer to move turn left)
-  TRAVELLING --> TRAVELLING: !obstacleInFront (externally write to mixer to move forward)
+  SEARCHING --> TRAVELLING : !obstacleInFront 
+  SEARCHING --> SEARCHING: obstacleInFront
+  TRAVELLING --> SEARCHING: obstacleInFront
+  TRAVELLING --> TRAVELLING: !obstacleInFront
