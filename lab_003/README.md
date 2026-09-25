@@ -11,6 +11,10 @@
 - [x] write the dabble RC task
 - [x] check for side effects to lab 1 because we're going to define a new `detectEdge` function in the utils
 
+# Video
+
+Video is linked [here](https://youtu.be/XVwZ9U6aNO0?si=H0Xq829ptklcT05).
+
 # Tasks
 
 We will use the following task from the previous labs:
