@@ -1,10 +1,9 @@
 #pragma once
 
-/*
 #include "mixer.h"
 
 // if the distance is less than MIN_ULTRASONIC_DISTANCE_CM, then we turn left
-#define MIN_ULTRASONIC_DISTANCE_CM 30.0f
+#define MIN_ULTRASONIC_DISTANCE_CM 60.0f
 
 // so our state machine has 2 states:
 // - searching
@@ -24,4 +23,3 @@ const char *getDabbleAutoModeStateName(DabbleAutoModeState dabbleAutoModeState);
 void dabbleAutoModeInit();
 
 void dabbleAutoModeTask(void *args);
-*/

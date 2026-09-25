@@ -1,12 +1,14 @@
 #pragma once
-/*
+
 #include "dabbleAutoMode.h"
 #include "dabbleOrchestrator.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "logging.h"
+#include "mixer.h"
 #include "ultrasonic.h"
 #include <Arduino.h>
+#include <iterator>
 
 DabbleAutoModeState currentDabbleAutoModeState;
 
@@ -26,14 +28,15 @@ void dabbleAutoModeInit() {
   // pinned to core 1
   // start in searching mode
   currentDabbleAutoModeState = SEARCHING;
-  xTaskCreatePinnedToCore(dabbleAutoModeTask, "Dabble Auto Mode Task", 4096,
+  xTaskCreatePinnedToCore(dabbleAutoModeTask, "Dabble Auto Mode Task", 8192,
                           nullptr, 1, nullptr, 1);
 }
 
 void dabbleAutoModeTask(void *args) {
-  LogMessage ultrasonicLogMessage;
+  LogMessage dabbleAutoModeLogMessage;
   UltrasonicData ultrasonicData;
-  ultrasonicLogMessage.logSource = ULTRASONIC;
+  dabbleAutoModeLogMessage.logSource = DABBLE_AUTO_MODE;
+
   while (true) {
     xQueueReceive(ultrasonicQueueHandle, &ultrasonicData, portMAX_DELAY);
 
@@ -51,7 +54,7 @@ void dabbleAutoModeTask(void *args) {
     // back the mutex
     xSemaphoreGive(currentDabbleRCModeMutex);
 
-    ultrasonicLogMessage.timestamp = millis();
+    dabbleAutoModeLogMessage.timestamp = millis();
 
     // first, we need the transition conditions
 
@@ -77,11 +80,10 @@ void dabbleAutoModeTask(void *args) {
         speed.linear = searchingSpeed.linear;
         speed.angular = searchingSpeed.angular;
         currentDabbleAutoModeState = SEARCHING;
-        sprintf(ultrasonicLogMessage.text,
-                "The distance is %f cm. Transitioning %s to %s",
-                getDabbleAutoModeStateName(TRAVELLING),
+        sprintf(dabbleAutoModeLogMessage.text, "%f cm. Transitioning %s to %s",
+                distanceCentimeters, getDabbleAutoModeStateName(TRAVELLING),
                 getDabbleAutoModeStateName(SEARCHING));
-        xQueueSend(logQueueHandle, &ultrasonicLogMessage, 0);
+        xQueueSend(logQueueHandle, &dabbleAutoModeLogMessage, 0);
       } else {
         speed.linear = travellingSpeed.linear;
         speed.angular = travellingSpeed.angular;
@@ -96,20 +98,17 @@ void dabbleAutoModeTask(void *args) {
         speed.linear = travellingSpeed.linear;
         speed.angular = travellingSpeed.angular;
         currentDabbleAutoModeState = TRAVELLING;
-        sprintf(ultrasonicLogMessage.text,
-                "The distance is %f cm. Transitioning %s to %s",
-                getDabbleAutoModeStateName(SEARCHING),
+        sprintf(dabbleAutoModeLogMessage.text, "%f cm. Transitioning %s to %s",
+                distanceCentimeters, getDabbleAutoModeStateName(SEARCHING),
                 getDabbleAutoModeStateName(TRAVELLING));
-        xQueueSend(logQueueHandle, &ultrasonicLogMessage, 0);
+        xQueueSend(logQueueHandle, &dabbleAutoModeLogMessage, 0);
       } else {
         speed.linear = searchingSpeed.linear;
         speed.angular = searchingSpeed.angular;
       }
       break;
     }
-
     xSemaphoreGive(speedMutex);
     xTaskNotifyGive(mixerTaskHandle);
   }
 }
-*/
