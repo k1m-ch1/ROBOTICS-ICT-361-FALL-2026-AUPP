@@ -1,0 +1,19 @@
+Test accuracy: 0.9261
+Baseline accuracy: 0.1135
+
+              precision    recall  f1-score   support
+
+        zero       0.96      0.98      0.97       980
+         one       0.97      0.98      0.97      1135
+         two       0.94      0.89      0.92      1032
+       three       0.89      0.92      0.91      1010
+        four       0.93      0.93      0.93       982
+        five       0.92      0.86      0.89       892
+         six       0.94      0.95      0.95       958
+       seven       0.93      0.92      0.93      1028
+       eight       0.87      0.90      0.89       974
+        nine       0.90      0.91      0.91      1009
+
+    accuracy                           0.93     10000
+   macro avg       0.93      0.92      0.93     10000
+weighted avg       0.93      0.93      0.93     10000
