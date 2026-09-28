@@ -41,6 +41,7 @@ void ultrasonicTask(void *args) {
     digitalWrite(ultrasonicPins.trig, HIGH);
     delayMicroseconds(10);
     digitalWrite(ultrasonicPins.trig, LOW);
+    /*
     // read a HIGH pulse
     while (!digitalRead(ultrasonicPins.echo)) {
       // do nothing until it goes HIGH
@@ -54,6 +55,8 @@ void ultrasonicTask(void *args) {
       // now we're reading the pulse
     }
     pulsePeriodMicroseconds = micros() - pulsePeriodMicroseconds;
+    */
+    pulsePeriodMicroseconds = pulseIn(ultrasonicPins.echo, HIGH);
 
     // record the time we got the LOW pulse
     ultrasonicData.timestamp = millis();
