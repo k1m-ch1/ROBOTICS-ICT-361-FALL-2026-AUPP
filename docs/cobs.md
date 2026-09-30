@@ -21,3 +21,9 @@ A simple decoder can be something like:
 - ...
 
 When encoding, add a `0x00` when we're first starting because we want to ensure the listener is synchronized (or something else because `0x00` is super common. It's ideal to use something like `0xAA` or something that doesn't really appear in the ASCII's 0 to 9, A-z, but honestly, it doesn't matter that much). I think `0xAA` is a good choice.
+
+# Using COBS to frame structs
+
+The idea is as follows:
+
+- structs can be treated as a sequence of bytes, that is, we can treat it as a frame where we have an array of bytes, and we have the size of the array.
