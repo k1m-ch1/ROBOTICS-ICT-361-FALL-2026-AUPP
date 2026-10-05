@@ -22,6 +22,8 @@ typedef enum {
   DABBLE_ORCHESTRATOR,
   DABBLE_MANUAL_MODE,
   DABBLE_AUTO_MODE,
+  FRAME_DECODER,
+  FRAME_READER
 } LogSource;
 
 typedef struct {

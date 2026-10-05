@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#define SERIAL_BAUD_RATE 115200
 #define ADC_RESOLUTION 12
 #define MOTORS_AMOUNT 4
 

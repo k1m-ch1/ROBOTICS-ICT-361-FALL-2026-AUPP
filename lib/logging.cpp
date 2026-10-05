@@ -13,7 +13,7 @@ void loggingInit() {
   // NOTE: remember to init this as boilerplate. More responsibility, definitely
   // isn't pure and definitely is causing side effects, but it seems like this
   // is common in embedded programming...
-  Serial.begin(115200);
+  Serial.begin(SERIAL_BAUD_RATE);
   logQueueHandle = xQueueCreate(LOG_QUEUE_SIZE, sizeof(LogMessage));
 
   xTaskCreate(loggingTask, "Logging Task", 4096, nullptr, 1,
@@ -44,6 +44,10 @@ const char *getLogSourceName(LogSource logSource) {
     return "DABBLE_MANUAL_MODE";
   case DABBLE_AUTO_MODE:
     return "DABBLE_AUTO_MODE";
+  case FRAME_DECODER:
+    return "FRAME_DECODER";
+  case FRAME_READER:
+    return "FRAME_READER";
   default:
     return "UNKNOWN";
   }

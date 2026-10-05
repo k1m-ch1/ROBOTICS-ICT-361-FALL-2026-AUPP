@@ -77,6 +77,7 @@ Frame cobsDecode(Frame encodedFrame) {
   // if we have one traversal left (because we need just one more traversal to
   // reach the delimiter), then that's good, otherwise, something went wrong
   if (traversals != 1) {
+    free(decodedFrame.framePtr);
     return (Frame){};
   }
   return decodedFrame;
