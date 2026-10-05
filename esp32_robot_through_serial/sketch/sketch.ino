@@ -5,7 +5,7 @@
 void setup(){
   loggingInit();
   frameDecoderInit();
-  //frameReaderInit();
+  frameReaderInit();
 }
 
 void loop(){
