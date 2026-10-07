@@ -63,4 +63,4 @@ typedef struct {
 constexpr UltrasonicPins ultrasonicPins = {.trig = 13, .echo = 39};
 
 const MotorConfig motorConfig = {
-    .freq = 20000, .resolution = 8, .deadzone = 0.04f};
+    .freq = 20000, .resolution = 8, .deadzone = 0.1f};

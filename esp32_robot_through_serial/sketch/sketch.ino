@@ -1,9 +1,17 @@
 #include "logging.h"
 #include "frameReader.h"
 #include "frameDecoder.h"
+#include "mixer.h"
+#include "motors.h"
+#include "servo.h"
 
 void setup(){
   loggingInit();
+  motorsInit();
+  mixerInit();
+  servoInit();
+  servoWrite(140.0f);
+
   frameDecoderInit();
   frameReaderInit();
 }

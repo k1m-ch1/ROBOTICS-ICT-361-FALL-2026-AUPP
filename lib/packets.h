@@ -13,3 +13,8 @@ typedef struct __attribute__((packed)) {
   float linear;
   float angular;
 } SetSpeedLimit;
+
+typedef struct __attribute__((packed)) {
+  uint8_t packetID = 0x03;
+  float angle;
+} SetServoAngle;

@@ -13,18 +13,6 @@ class Frame(ctypes.Structure):
 cobs.cobsEncode.argtypes = [Frame]
 cobs.cobsEncode.restype = Frame
 
-#data = bytes([0x11, 0x22, 0x00, 0x33])
-#buffer = (ctypes.c_uint8*len(data)).from_buffer_copy(data)
-#print(type(buffer))
-#frame = Frame(
-#    buffer,
-#    len(data)
-#)
-#
-#encoded = cobs.cobsEncode(frame)
-#print(encoded.size)
-#print(bytes(encoded.framePtr[:encoded.size]).hex(' '))
-
 def c_frame_constructor(frame_as_bytes):
     buffer = (ctypes.c_uint8*len(frame_as_bytes)).from_buffer_copy(frame_as_bytes)
     frame = Frame(
@@ -43,4 +31,4 @@ def packet_constructor(packet_name, args):
     packed_struct = struct.pack(packet_format, packet_id, *args)
     raw_frame = c_frame_constructor(packed_struct)
     encoded_frame = cobs.cobsEncode(raw_frame)
-    return encoded_frame
+    return c_frame_deconstructor(encoded_frame)
