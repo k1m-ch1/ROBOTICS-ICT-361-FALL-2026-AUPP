@@ -31,7 +31,7 @@ void servoWrite(float angle) {
       getDutyCycle(servoConfig.freq, servoConfig.maxPulseMicroseconds);
 
   float duty = (1 - t) * minDutyCycle + t * maxDutyCycle;
-  uint32_t dutyToWrite = (uint32_t)(duty * (1 << servoConfig.resolution));
+  uint32_t dutyToWrite = (uint32_t)(duty * ((1 << servoConfig.resolution) - 1));
   ledcWrite(SERVO_PIN, dutyToWrite);
   /*
   sprintf(servoLogMessage.text, "angle: %f, duty: %f, dutyToWrite: %lu", angle,
