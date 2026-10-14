@@ -1,3 +1,23 @@
+# Installation
+
+In order to create a virtual environment that includes the legacy version of `mediapipe`, we will use `uv`
+
+We will use python `3.10`:
+
+```
+uv venv --python 3.10 --seed
+```
+
+Then we can install:
+
+```
+pip install mediapipe==0.10.9 opencv-python
+```
+
+We install the `0.10.9` version because it's smaller
+
+# Plan
+
 Sign mapping:
 
 - V sign (index + middle fingers up): Move Forward
@@ -20,7 +40,7 @@ To determine which fingers are up, I have some ideas:
 Well, if we know a good heuristic to determine whether hands are open and closed, then we have the following if-else conditional:
 
 - Open palm: we just check whether all 5 fingers are up
-- Fist move: just check whether all 5 fingers are down
+- Fist move: just check whether all 5 fingers are down (perhaps it can be independent of the thumb)
 - V sign: check whether index and middle finger are both up
 - Only Index finger pointing up: check for two cases:
   - take the tip of the finger and the base of the finger and compute the vector from the base of the finger to the tip of the finger
@@ -35,3 +55,11 @@ Apparantly, here are some good references:
 - index MCP → pinky MCP
 
 We'll need to measure it empirically and set it as parameters.
+
+If we don't want to scale it, another robust heuristic is to make sure that if we draw a vector from the finger tip to the finger MCP, we want to specify 2 vectors, one from the MCP to the tip, another from the MCP to the pip, and then we consider the hand to be open when the magnitude of the MCP to the finger tip is greater than that from the MCP to the pip. Similarly, angle can be determined by specifying the vector between the MCP and the tip, given that then are considered "open".
+
+Let's try the euclidean distance between the tip and wrist instead
+
+# TODO
+
+- [] specify a better heuristic for open palm finger
