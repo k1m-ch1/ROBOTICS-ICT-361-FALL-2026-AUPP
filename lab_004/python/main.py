@@ -4,6 +4,16 @@ import time
 from enum import Enum
 import math
 from dataclasses import dataclass
+from queue import Queue
+
+import serial
+import serial_reader
+import threading
+import cobs
+import mpeg_server
+
+SERIAL_PORT = "/dev/ttyUSB0"
+BAUD_RATE = 115200
 
 FRAME_RATE = 30
 
@@ -105,7 +115,7 @@ def determine_action(hand_landmarks):
     elif (is_closed_palm):
         # if it is a closed palm, go backwards
         return Action(geasture="fist",
-                      state=States.STOP)
+                      state=States.BACKWARD)
     elif (is_v_sign):
         return Action(geasture="v sign",
                       state=States.FORWARD)
@@ -131,6 +141,19 @@ def determine_action(hand_landmarks):
 
 
 def main():
+    frame_queue = Queue()
+
+    web_server_thread = threading.Thread(target=mpeg_server.web_server, args=(frame_queue,))
+    web_server_thread.start()
+
+    ser = serial.Serial(SERIAL_PORT, BAUD_RATE)
+    serial_reader_thread = threading.Thread(target=serial_reader.serial_reader, args=(ser,))
+    serial_reader_thread.start()
+
+    # set the speed limit initially
+    packet = cobs.packet_constructor("SetSpeedLimit", (0.1, 0.1))
+    ser.write(packet + bytes([0x00]))
+
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -168,16 +191,37 @@ def main():
 
                     cv2.putText(
                         frame,
-                        action.geasture,
+                        f"""Geasture: {action.geasture}
+                        Action: {action.state.name}
+                        """,
                         (10, 60),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         1.5,
                         (0, 255, 0),
                         3
                     )
+                    if (action.state == States.STOP):
+                        packet = cobs.packet_constructor("SetSpeed", (0, 0))
+                        ser.write(packet + bytes([0x00]))
+                    elif (action.state == States.FORWARD):
+                        packet = cobs.packet_constructor("SetSpeed", (1, 0))
+                        ser.write(packet + bytes([0x00]))
+                    elif (action.state == States.BACKWARD):
+                        packet = cobs.packet_constructor("SetSpeed", (-1, 0))
+                        ser.write(packet + bytes([0x00]))
+                    elif (action.state == States.LEFT):
+                        packet = cobs.packet_constructor("SetSpeed", (0, 1))
+                        ser.write(packet + bytes([0x00]))
+                    elif (action.state == States.RIGHT):
+                        packet = cobs.packet_constructor("SetSpeed", (0, -1))
+                        ser.write(packet + bytes([0x00]))
+            else:
+                # force stop if no hand is detected
+                packet = cobs.packet_constructor("SetSpeed", (0, 0))
+                ser.write(packet + bytes([0x00]))
 
             cv2.imshow("determining action", frame)
-
+            frame_queue.put(frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 

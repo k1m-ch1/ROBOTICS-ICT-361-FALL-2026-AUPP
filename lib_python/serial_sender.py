@@ -14,6 +14,7 @@ if __name__ == "__main__":
     serial_reader_thread = threading.Thread(target=serial_reader.serial_reader, args=(ser,))
     serial_reader_thread.start()
 
+
     packet = cobs.packet_constructor("SetSpeedLimit", (0.1, 0.1))
     ser.write(packet + bytes([0x00]))
 
