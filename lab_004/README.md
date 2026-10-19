@@ -11,7 +11,7 @@ uv venv --python 3.10 --seed
 Then we can install:
 
 ```
-pip install mediapipe==0.10.9 opencv-python
+pip install mediapipe==0.10.9 opencv-python pyserial
 ```
 
 We install the `0.10.9` version because it's smaller
