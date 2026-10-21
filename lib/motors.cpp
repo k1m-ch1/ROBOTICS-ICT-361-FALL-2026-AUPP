@@ -20,7 +20,7 @@ void motorsInit() {
 
 void motorWrite(MotorPins motorPins, float normalizedMotorCommand) {
   uint32_t duty = 0;
-  uint32_t scalingFactor = 1 << motorConfig.resolution;
+  uint32_t scalingFactor = (1 << motorConfig.resolution) - 1;
   // duty isn't normalized, and is scaled by the resolution that we choose to
   // initialize lecdAttach. For instance, if we choose 8, it will be from 0 to
   // 256
