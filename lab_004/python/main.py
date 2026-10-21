@@ -151,7 +151,7 @@ def main():
     serial_reader_thread.start()
 
     # set the speed limit initially
-    packet = cobs.packet_constructor("SetSpeedLimit", (0.1, 0.1))
+    packet = cobs.packet_constructor("SetSpeedLimit", (0.25, 0.25))
     ser.write(packet + bytes([0x00]))
 
     cap = cv2.VideoCapture(0)
@@ -220,7 +220,7 @@ def main():
                 packet = cobs.packet_constructor("SetSpeed", (0, 0))
                 ser.write(packet + bytes([0x00]))
 
-            cv2.imshow("determining action", frame)
+            #cv2.imshow("determining action", frame)
             frame_queue.put(frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
