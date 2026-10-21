@@ -1,0 +1,9 @@
+flowchart TD
+  Start([Start]) --> WhileTrue{while True}
+
+  WhileTrue -- true --> ListensForBytes[wait for new bytes]
+  ListensForBytes --> CheckDelimiter{is the byte a 0x00 delimiter?}
+  CheckDelimiter -- yes --> SendFrame[package byte array as a frame and send it to the frame queue]
+  SendFrame --> WhileTrue
+  CheckDelimiter -- no --> StoreBuffer[store the byte in a buffer]
+  StoreBuffer --> WhileTrue

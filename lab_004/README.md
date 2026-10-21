@@ -16,50 +16,127 @@ pip install mediapipe==0.10.9 opencv-python pyserial
 
 We install the `0.10.9` version because it's smaller
 
-# Plan
+# Usage
 
-Sign mapping:
+## ESP32 code
 
-- V sign (index + middle fingers up): Move Forward
-- Fist Move: BACKWARD,70
-- Index finger pointing left: left turn
-- Index finger pointing right: right turn
-- Open palm: Stop
+First upload the code to the ESP32:
 
-The plan is this, because we want the sign recognition to be mutually exclusive, instead of training some classification model which is like the proper way to do things, we will just use some heuristics to determine which sign we're intending to do. We'll just use a bunch of conditional, with of course, a built in priority of what it should recognize.
+```
+cd esp32_robot_through_serial
+```
 
-So mediapipe will essentially give me the points of each "landmark" of our finger, such as base as the finger, or tip of the finger, etc.
+Then, run the upload sketch:
 
-To determine which fingers are up, I have some ideas:
+```
+./upload ./sketch/ /dev/ttyUSB0
+```
 
-- the naive idea is to set some heuristic like "if euclidean distance between tip to base is greater than x pixels, then we consider it to be up"
-- of course, this is prone to scaling issues, because like, it's hard to do projection, so another idea is to do scaling based on the maximum euclidean distance, however, this isn't robust since the hand-closed gesture and the hand-open gesture is going to be treated the same
-- so if we want a reference scale, perhaps it would be best to use another point on the hand that is going to be:
-  - visible regardless of whether the hand is open or closed
+## Raspberry pi
 
-Well, if we know a good heuristic to determine whether hands are open and closed, then we have the following if-else conditional:
+SSH to the raspberry pi
 
-- Open palm: we just check whether all 5 fingers are up
-- Fist move: just check whether all 5 fingers are down (perhaps it can be independent of the thumb)
-- V sign: check whether index and middle finger are both up
-- Only Index finger pointing up: check for two cases:
-  - take the tip of the finger and the base of the finger and compute the vector from the base of the finger to the tip of the finger
-  - use it to find the angle using the dot product formula
-  - if the angle is in this particular range, treat it as a index pointing to the left
-  - if the angle is in some other particular range, treat it as an index pointing to the right
-- Otherwise, do nothing
+First activate the virtual environment
 
-Apparantly, here are some good references:
+```
+source ./.venv/bin/activate
+```
 
-- wrist → middle-finger MCP
-- index MCP → pinky MCP
+```
+cd python
+```
 
-We'll need to measure it empirically and set it as parameters.
+Then run:
 
-If we don't want to scale it, another robust heuristic is to make sure that if we draw a vector from the finger tip to the finger MCP, we want to specify 2 vectors, one from the MCP to the tip, another from the MCP to the pip, and then we consider the hand to be open when the magnitude of the MCP to the finger tip is greater than that from the MCP to the pip. Similarly, angle can be determined by specifying the vector between the MCP and the tip, given that then are considered "open".
+```
+python3 ./main.py
+```
 
-Let's try the euclidean distance between the tip and wrist instead
+# Serial protocol
 
-# TODO
+We send raw structs through the serial channel, while framing it using Constant Overhead Bit Stuffing (COBS). More about it can be found here:
 
-- [] specify a better heuristic for open palm finger
+- [cobs encoding, and packet framing explanation](../docs/cobs.md)
+- [protocol explanation](../docs/protocol.md)
+
+# ESP32 code
+
+We have use:
+
+- mixer task
+- logging task
+- frame decoder task
+- frame reader task
+
+The whole task diagram looks like this:
+
+![task diagram](./assets/esp32.mmd.svg)
+
+The frame decoder's job is to just use the delimiter `0x00` to package the binary string into a frame, decode it, and then send it to the frame queue.
+
+![frame decoder task](./assets/frameDecoder.mmd.svg)
+
+The frame reader's job is to take the decoded frame and then interpret it as a struct according to its packet ID, and then act accordingly.
+
+![frame reader task](./assets/frameReader.mmd.svg)
+
+# Finger detection Heursitics
+
+We use OpenCV, mainly to capture video images and write text to the frames and also convert it to different formats for displaying. We then use mediapipe to get the landmarks of the hands. We're interested in the following landmarks:
+
+- finger TIP of all 4 fingers
+- finger PIP of all 4 fingers
+- wrist landmark
+- MCP of the index finger
+- TIP of the thumb
+- PIP of the thumb
+
+For the 4 fingers, we use that heuristics that:
+
+```python
+finger_open = wrist_to_finger_tip_distance > wrist_to_finger_pip_distance
+```
+
+The wrist to finger tip distance is simply the euclidean distance, which can be calculated using the Pythagorean theorem. We do this because we want to maintain orientation regardless of whether which orientation the hand is facing.
+
+For the thumb specifically, we use a different heuristic:
+
+```python
+thumb_up = index_mcp_to_thumb_tip_distance > index_mcp_to_thumb_ip_distance
+```
+
+As for measuring the index angle, we simply used the `atan2` function to get the angle, and specify that when only the index finger is up:
+
+- if $|\alpha| < 90^\circ$, then consider it as right pointing
+- otherwise, it's left pointing.
+
+```python
+if (is_index_only):
+    # if it is index only, divide into two cases. we must now calculate the angle by doing atan2
+    angle = math.degrees(math.atan2(-wrist_to_tip_vector[finger_string_to_index["index"]][1], wrist_to_tip_vector[finger_string_to_index["index"]][0]))
+    
+    # if the angle is in between [90, 180] and [-90, -180] consider it as left
+    # otherwise, if it's in between [0, 90] and [-90, 0] consider it as right
+    # we can more elegantly state this by computing |alpha| > 90 as left and |alpha| < 90 as right
+    if math.fabs(angle) > 90:
+        return Action(geasture="index pointing left",
+                      state=States.LEFT)
+    elif math.fabs(angle) <= 90:
+        return Action(geasture="index pointing right",
+                      state=States.RIGHT)
+
+```
+
+The simplified flowchart to recognize the gestures look something like this:
+
+![flowchart](./assets/recognizeGeastures.mmd.svg)
+
+The whole python code looks something like this:
+
+![gestures](./assets/python.mmd.svg)
+
+# Video showcase
+
+Video showcase is linked [here](https://youtu.be/zZY__z05TKE).
+
+

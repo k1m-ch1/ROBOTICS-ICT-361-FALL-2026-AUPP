@@ -1,0 +1,7 @@
+flowchart LR
+  Logging[Logging task]
+  Mixer[Mixer task]
+  FrameDecoder[Frame Decoder task]
+  FrameReader[Frame Reader]
+  FrameDecoder -- push decoded frames --> FrameReader
+  FrameReader -- writes motor commands and notifies --> Mixer

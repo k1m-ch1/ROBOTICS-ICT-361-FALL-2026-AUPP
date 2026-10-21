@@ -1,0 +1,5 @@
+flowchart TD
+    Start([Start]) --> GetLandmarks["Get landmarks"]
+    GetLandmarks --> Heuristics["uses the heuristics to see whether the 4 fingers are up, or whether the thumb is up"]
+    Heuristics --> CalculateBooleanHeuristics["use that information to determine whether the palm is open (all fingers and thumb are up); fist (all fingers are closed); v sign (only index and middle fingers are up); index only (only index is up)"]
+    CalculateBooleanHeuristics --> DecideOnCommands["if palm is open, send command the motors to stop. if fist sign, command the motors to move backwards. if it's a v sign, move forward. if it's an index pointing, check the angle, and command the motors accordingly. Otherwise, send a stop."]

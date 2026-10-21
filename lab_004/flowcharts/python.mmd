@@ -1,0 +1,11 @@
+flowchart TD
+    Start([Start]) --> Init["initialize camera, serial reader, and web server thread (takes a frame queue as argument)"]
+    Init --> WhileTrue{While True}
+    WhileTrue -- False --> End([End])
+    WhileTrue -- True --> CaptureFrame["capture frame"]
+    CaptureFrame --> IfHandAvailable{if hand available}
+    IfHandAvailable -- no --> WhileTrue
+    IfHandAvailable -- yes --> ProcessLandMark["process finger landmark (if available)"]
+    ProcessLandMark --> RecognizeGeasture["use the landmark array to recognize geastures"]
+    RecognizeGeasture --> SendCommands["use the geastures to send commands accordingly"]
+    SendCommands --> WhileTrue

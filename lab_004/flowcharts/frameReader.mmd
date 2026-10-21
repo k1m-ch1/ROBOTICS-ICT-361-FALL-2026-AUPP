@@ -1,0 +1,5 @@
+flowchart TD
+  Start([Start]) --> WhileTrue{while True}
+  WhileTrue -- true --> WaitForFrames[wait for new frames in the frame queue]
+  WaitForFrames --> CheckPacketID[check for packet ID and decode accordingly into a struct. Then use that struct to act accordingly. If we get a SetSpeedLimit message, set the speed limit. If we get a SetSpeed message, set the speed and notify the mixer task. If we get a SetServoAngle message, set the servo angle.]
+  CheckPacketID --> WhileTrue
