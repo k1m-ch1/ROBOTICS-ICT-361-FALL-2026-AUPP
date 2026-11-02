@@ -48,18 +48,18 @@ Well, we can't do it exactly, but for a differential drive robot (without encode
 
 We'll first derive it in terms of pure kinematics (using velocity, angular velocity, and the center of mass to the wheel distance), and then we'll make the approximations to what we actually control.
 
-Right now, we can control the robot's linear speed $v = |\vec{v}|$, and also the angular velocity $\theta$ separately.
+Right now, we can control the robot's linear speed $v_l = \left| \vec{v} \right|$, and also the angular velocity $\dot{\theta}$ separately.
 
 If we want the robot to move in a circle, we essentially want the following relation
 
 $$
-v = R \dot{\theta}
+v_l = R \dot{\theta}
 $$
 
 If we control the velocity $v$, then to get $\dot{\theta}$:
 
 $$
-\dot{\theta} = \frac{v}{R}
+\dot{\theta} = \frac{v_l}{R}
 $$
 
 NOTE: you must worry about signs as well
@@ -70,7 +70,7 @@ So we don't actually control the linear velocity $v$, and angular velocity $\dot
 
 What we want to do now is make sure the unit scaling is reasonable, such that we turn in a way that approximates theoretical curve we generate.
 
-Let's say that we don't care about air resistance, or the fact that using 4 motors would allow the car to contract all of the resistances more than using just 1 motor. That is to say, let's say that when we apply a pwm signal $u_m$ to any of the motor, we get the same velocity $v_m$, and if we apply the pwm signal to all 4 motors, each motor would still have the same velocity $v_m$. Also, $u_m$ will be normalized, and will remove dead zone also, such that the scaling is approximately linear.
+Let's say that we don't care about air resistance, or the fact that using 4 motors would allow the car to counteract all of the resistances more than using just 1 motor. That is to say, let's say that when we apply a pwm signal $u_m$ to any of the motor, we get the same velocity $v_m$, and if we apply the pwm signal to all 4 motors, each motor would still have the same velocity $v_m$. Also, $u_m$ will be normalized, and will remove dead zone also, such that the scaling is approximately linear.
 
 We apply a linear approximation that says:
 
@@ -92,7 +92,7 @@ $$
 v_a = r \dot{\theta}
 $$
 
-Where $v_a$ is the additional velocity of the wheel which causes it to turn.
+Where $v_a$ is the additional velocity of the wheel which the robot to rotate in the x-z plane.
 
 Using the linear approximation:
 
@@ -153,3 +153,23 @@ u_a = \frac{r u_l}{R}
 $$
 
 NOTE: on the robot, we can set different speeds for linear and angular velocity, but to make this work, we'll need to set the maximum linear and angular velocity to be the same.
+
+# Implementation details
+
+So it might be possible that $x_w \approx 0$, which may cause like overflows, so we'll use the curvature $\kappa$ instead
+
+$$
+\kappa = \frac{1}{R}
+$$
+
+thus:
+
+$$
+\kappa = \frac{2 x_w}{x_2^2 + y_w^2}
+$$
+
+And so:
+
+$$
+u_a = r \kappa u_l
+$$
