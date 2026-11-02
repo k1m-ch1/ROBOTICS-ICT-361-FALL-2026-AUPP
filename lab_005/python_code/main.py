@@ -19,7 +19,7 @@ FRAME_RATE = 30
 def main():
     frame_queue = Queue()
 
-    web_server_thread = threading.Thread(target=mpeg_server.web_server, args=(frame_queue,))
+    web_server_thread = threading.Thread(target=mpeg_server.web_server, args=(frame_queue,8080))
     web_server_thread.start()
 
     ser = serial.Serial(SERIAL_PORT, BAUD_RATE)

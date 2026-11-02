@@ -3,7 +3,7 @@ import cv2
 
 PORT = 8080
 
-def web_server(queue):
+def web_server(queue, port):
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
             if self.path != "/":
@@ -27,5 +27,5 @@ def web_server(queue):
                     b"\r\n"
                 )
 
-    HTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+    HTTPServer(("0.0.0.0", port), Handler).serve_forever()
 
