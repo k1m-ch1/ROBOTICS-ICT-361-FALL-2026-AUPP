@@ -26,13 +26,13 @@ HSV_UPPER_BOUND = (179, 255, 150)
 IMAGE_WIDTH = 640
 IMAGE_HEIGHT = 480
 
-MAX_LINEAR_SPEED = 0.075
+MAX_LINEAR_SPEED = 0.1
 MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED
 
 PIXELS_PER_CM = IMAGE_WIDTH/5
 
 # this is approximately the distance between the center of mass of the car to the start of the image seen in the camera
-CAMERA_VERTICAL_OFFSET_FROM_CM = 2.5
+CAMERA_VERTICAL_OFFSET_FROM_CM = 4.1
 MOTOR_TO_CM = 10
 
 TOP_IMAGE_TEXT_COORD = (20, 20)
@@ -71,7 +71,7 @@ def main():
     serial_reader_thread.start()
 
     # set the speed limit initially
-    packet = cobs.packet_constructor("SetSpeedLimit", (MAX_LINEAR_SPEED, MAX_ANGULAR_SPEED))
+    packet = cobs.packet_constructor("SetSpeedLimit", (1, 1))
     ser.write(packet + bytes([0x00]))
 
     packet = cobs.packet_constructor("SetSpeed", (0, 0))
@@ -125,12 +125,12 @@ def main():
                 coordinates=(x_cm, y_cm),
             )
 
-            linear_speed = 1
+            linear_speed = MAX_LINEAR_SPEED
             angular_speed = get_normalized_angular_effort(
                 actual_coordinates[0],
                 actual_coordinates[1],
                 MOTOR_TO_CM
-            ) * linear_speed
+            ) * MAX_ANGULAR_SPEED
 
             draw_text(
                 frame=frame,

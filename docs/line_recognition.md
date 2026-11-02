@@ -19,3 +19,20 @@ For our purposes of black line detection, our threshold only considers the value
 # Centroid
 
 After we calculate the mask, if our "line density" is high enough, we will then calculate the centroid of the line in order to get a point, and then turn that line into a way point. We then run that point from the image and map it to an approximate point in global space, and feed it into our pure pursuit algorithm.
+
+For discrete masses, the centroid is calculated as such. The center of mass definition states:
+
+$$
+M \vec{r_{cm}} = \sum_{i = 1}^{n} m_i \vec{r_i}
+$$
+
+In our case, our masses will be defined using the pixel values.
+
+OpenCV can perform this calculation for us using its `cv2.moments` method.
+
+`cv2.moments` returns a dictionary, with the following key definition:
+
+- key `m00` maps to the sum of pixel intensities (total mass)
+- key `m01` maps to the first-order moment along the y-axis
+- key `m10` maps to the first-order moment along the x-axis
+

@@ -4,6 +4,7 @@ import cv2
 PORT = 8080
 
 def web_server(queue, port):
+
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
             if self.path != "/":
@@ -27,5 +28,6 @@ def web_server(queue, port):
                     b"\r\n"
                 )
 
+    print(f"Server started on port: {port}")
     HTTPServer(("0.0.0.0", port), Handler).serve_forever()
 
