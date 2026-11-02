@@ -15,15 +15,20 @@ if __name__ == "__main__":
     serial_reader_thread.start()
 
 
-    packet = cobs.packet_constructor("SetSpeedLimit", (0.1, 0.1))
+    packet = cobs.packet_constructor("SetSpeedLimit", (1, 1))
     ser.write(packet + bytes([0x00]))
 
-    for i in range(100):
-        packet = cobs.packet_constructor("SetSpeed", (i/100, 0))
-        ser.write(packet + bytes([0x00]))
-        packet = cobs.packet_constructor("SetServoAngle", (70 + (i/100)*(140 - 70),))
-        ser.write(packet + bytes([0x00]))
-        time.sleep(0.1)
+    #for i in range(100):
+    #    packet = cobs.packet_constructor("SetSpeed", (i/100, 0))
+    #    ser.write(packet + bytes([0x00]))
+    #    packet = cobs.packet_constructor("SetServoAngle", (70 + (i/100)*(140 - 70),))
+    #    ser.write(packet + bytes([0x00]))
+    #    time.sleep(0.1)
+
+    packet = cobs.packet_constructor("SetSpeed", (0.0001, 0))
+    ser.write(packet + bytes([0x00]))
+
+    time.sleep(2.5)
 
     packet = cobs.packet_constructor("SetSpeed", (0, 0))
     ser.write(packet + bytes([0x00]))
