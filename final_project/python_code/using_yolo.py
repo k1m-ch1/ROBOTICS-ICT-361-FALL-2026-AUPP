@@ -17,27 +17,9 @@ IMAGE_WIDTH = 640
 IMAGE_HEIGHT = 480
 
 MAIN_MPEG_SERVER_PORT = 8080
+RAW_MPEG_SERVER_PORT = 8000
 
 model = YOLO(MODEL_PATH)
-def gen_mjpeg():
-    while True:
-        ok, frame = cam.read()
-        if not ok or frame is None:
-            time.sleep(0.02)
-            continue
-        results = model.predict(frame, imgsz=IMG_SIZE, conf=CONF, verbose=False)
-        annotated = results[0].plot()
-        # optional resize to cut bandwidth/CPU:
-        # annotated = cv2.resize(annotated, (640, 360))
-        ok, jpg = cv2.imencode(".jpg", annotated, [cv2.IMWRITE_JPEG_QUALITY, 80])
-        if not ok:
-            continue
-        b = jpg.tobytes()
-        yield (b"--frame\r\n"
-               b"Content-Type: image/jpeg\r\n"
-               b"Cache-Control: no-cache\r\n"
-               b"Content-Length: " + str(len(b)).encode() + b"\r\n\r\n" + b + b"\r\n")
-
 if __name__ == "__main__":
     ser = Serial(port="/dev/ttyUSB0", baudrate=115200)
     packet = cobs.packet_constructor("SetServoAngle", (60, ))
@@ -47,14 +29,27 @@ if __name__ == "__main__":
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, IMAGE_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, IMAGE_HEIGHT)
     frame_queue = Queue()
+    raw_frame_queue = Queue()
+
     web_server_thread = threading.Thread(target=mpeg_server.web_server,
                                         args=(frame_queue, MAIN_MPEG_SERVER_PORT))
     web_server_thread.start()
+
+    raw_web_server_thread = threading.Thread(target=mpeg_server.web_server,
+                                        args=(raw_frame_queue, RAW_MPEG_SERVER_PORT))
+    raw_web_server_thread.start()
+
     while True:
         ret, frame = cap.read()
+
         if not ret:
             break
-        results = model.predict(frame, imgsz=IMG_SIZE, conf=CONF, verbose=False)
-        frame = results[0].plot()
-        if frame_queue.qsize() == 0:
-            frame_queue.put(frame)
+
+        if raw_frame_queue.qsize() == 0:
+            raw_frame_queue.put(frame)
+        
+        #results = model.predict(frame, imgsz=IMG_SIZE, conf=CONF, verbose=False)
+        #frame = results[0].plot()
+        #if frame_queue.qsize() == 0:
+        #    frame_queue.put(frame)
+
