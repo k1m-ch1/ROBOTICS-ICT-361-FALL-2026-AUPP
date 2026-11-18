@@ -3,6 +3,9 @@ from threading import Thread, Lock
 from ultralytics import YOLO
 import mpeg_server
 import threading
+from queue import Queue
+from serial import Serial
+import cobs
 
 MODEL_PATH = "../../yolo_model/weights/best.onnx"
 
@@ -13,7 +16,7 @@ CONF       = 0.5
 IMAGE_WIDTH = 640
 IMAGE_HEIGHT = 480
 
-MAIN_MPEG_SERVER_PORT = 8000
+MAIN_MPEG_SERVER_PORT = 8080
 
 model = YOLO(MODEL_PATH)
 def gen_mjpeg():
@@ -36,26 +39,22 @@ def gen_mjpeg():
                b"Content-Length: " + str(len(b)).encode() + b"\r\n\r\n" + b + b"\r\n")
 
 if __name__ == "__main__":
+    ser = Serial(port="/dev/ttyUSB0", baudrate=115200)
+    packet = cobs.packet_constructor("SetServoAngle", (60, ))
+    ser.write(packet + bytes([0x00]))
+
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, IMAGE_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, IMAGE_HEIGHT)
     frame_queue = Queue()
-    
+    web_server_thread = threading.Thread(target=mpeg_server.web_server,
+                                        args=(frame_queue, MAIN_MPEG_SERVER_PORT))
+    web_server_thread.start()
     while True:
-        web_server_thread = threading.Thread(target=mpeg_server.web_server,
-                                         args=(frame_queue, MAIN_MPEG_SERVER_PORT))
-        web_server_thread.start()
-
         ret, frame = cap.read()
         if not ret:
             break
         results = model.predict(frame, imgsz=IMG_SIZE, conf=CONF, verbose=False)
         frame = results[0].plot()
-        if len(frame_queue) == 0:
+        if frame_queue.qsize() == 0:
             frame_queue.put(frame)
-
-
-
-
-
-
